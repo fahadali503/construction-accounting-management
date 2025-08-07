@@ -8,9 +8,12 @@ export const useFinancialRecords = (projectId: string) => {
     return useQuery<FinancialRecord[]>({
         queryKey: ['financial-records', projectId],
         queryFn: async () => {
+            console.log('Fetching financial records for project:', projectId)
             const response = await axios.get(`${API_BASE_URL}/financial-records/${projectId}`)
+            console.log('Financial records response:', response.data)
             return response.data
         },
+        enabled: !!projectId, // Only run if projectId is provided
     })
 }
 
@@ -32,8 +35,24 @@ export const useCreateFinancialRecord = () => {
             const response = await axios.post(`${API_BASE_URL}/financial-records`, recordData)
             return response.data
         },
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['financial-records', variables.projectId] })
+        onSuccess: (data, variables) => {
+            console.log('Financial record created successfully:', data)
+            console.log('Invalidating cache for project:', variables.projectId)
+
+            // Invalidate and refetch the financial records query
+            queryClient.invalidateQueries({
+                queryKey: ['financial-records', variables.projectId],
+                exact: true
+            })
+
+            // Also refetch the query immediately
+            queryClient.refetchQueries({
+                queryKey: ['financial-records', variables.projectId],
+                exact: true
+            })
         },
+        onError: (error) => {
+            console.error('Error creating financial record:', error)
+        }
     })
 }

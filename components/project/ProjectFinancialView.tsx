@@ -15,10 +15,19 @@ interface ProjectFinancialViewProps {
 
 export function ProjectFinancialView({ projectId, onBack }: ProjectFinancialViewProps) {
     const { data: projects } = useProjects()
-    const { data: financialRecords, isLoading } = useFinancialRecords(projectId)
+    const { data: financialRecords, isLoading, refetch } = useFinancialRecords(projectId)
     const [showCreateDialog, setShowCreateDialog] = useState(false)
 
     const project = projects?.find(p => p.id === projectId)
+
+    const handleCreateDialogChange = (open: boolean) => {
+        setShowCreateDialog(open)
+        // Refetch data when dialog closes
+        if (!open) {
+            console.log('Dialog closed, refetching financial records...')
+            refetch()
+        }
+    }
 
     if (isLoading) {
         return (
@@ -86,7 +95,7 @@ export function ProjectFinancialView({ projectId, onBack }: ProjectFinancialView
 
             <CreateFinancialRecordDialog
                 open={showCreateDialog}
-                onOpenChange={setShowCreateDialog}
+                onOpenChange={handleCreateDialogChange}
                 projectId={projectId}
             />
         </div>

@@ -64,7 +64,7 @@ export function CreateFinancialRecordDialog({ open, onOpenChange, projectId }: C
         }
 
         try {
-            await createFinancialRecordMutation.mutateAsync({
+            const result = await createFinancialRecordMutation.mutateAsync({
                 projectId,
                 date: new Date(formData.date),
                 description: formData.description,
@@ -76,7 +76,10 @@ export function CreateFinancialRecordDialog({ open, onOpenChange, projectId }: C
                 totalAmount
             })
 
+            console.log('Financial record created successfully:', result)
             toast.success('Financial record created successfully!')
+
+            // Reset form
             setFormData({
                 date: new Date().toISOString().split('T')[0],
                 description: '',
@@ -86,8 +89,11 @@ export function CreateFinancialRecordDialog({ open, onOpenChange, projectId }: C
                 unitRatePrice: '',
                 qty: ''
             })
+
+            // Close dialog
             onOpenChange(false)
         } catch (error) {
+            console.error('Error creating financial record:', error)
             toast.error('Failed to create financial record')
         }
     }
