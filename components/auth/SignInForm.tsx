@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { signInSchema, SignInFormData } from "@/lib/validations/auth";
+import { passwordSchema, PasswordFormData } from "@/lib/validations/auth";
 import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
@@ -32,24 +32,23 @@ export function SignInForm({
     onSuccess,
     redirectTo = "/dashboard",
     showCard = true,
-    title = "Sign In",
-    description = "Enter your credentials to access your account",
+    title = "Access Construction Management",
+    description = "Enter the system password to continue",
 }: SignInFormProps) {
     const [showPassword, setShowPassword] = useState(false);
     const router = useRouter();
-    const signInMutation = useSignIn();
+    const { signIn, isLoading, error } = useSignIn();
 
-    const form = useForm<SignInFormData>({
-        resolver: zodResolver(signInSchema),
+    const form = useForm<PasswordFormData>({
+        resolver: zodResolver(passwordSchema),
         defaultValues: {
-            email: "",
             password: "",
         },
     });
 
-    const onSubmit = async (data: SignInFormData) => {
+    const onSubmit = async (data: PasswordFormData) => {
         try {
-            await signInMutation.mutateAsync(data);
+            await signIn(data);
 
             // Call success callback if provided
             if (onSuccess) {
@@ -59,51 +58,35 @@ export function SignInForm({
                 router.push(redirectTo);
             }
         } catch (error: any) {
-            // Handle field-specific errors
-            if (error.response?.data?.field) {
-                form.setError(error.response.data.field as keyof SignInFormData, {
-                    message: error.response?.data?.message || "Failed to sign in. Please try again.",
-                });
-            }
+            // Handle errors
+            form.setError("password", {
+                message: error || "Invalid password. Please try again.",
+            });
         }
     };
 
     const FormContent = () => (
         <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                    control={form.control}
-                    name="email"
-                    render={({ field }) => (
-                        <FormItem>
-                            <FormLabel>Email</FormLabel>
-                            <FormControl>
-                                <Input
-                                    placeholder="Enter your email"
-                                    type="email"
-                                    autoComplete="email"
-                                    disabled={signInMutation.isPending}
-                                    {...field}
-                                />
-                            </FormControl>
-                            <FormMessage />
-                        </FormItem>
-                    )}
-                />
+                {error && (
+                    <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-md">
+                        {error}
+                    </div>
+                )}
 
                 <FormField
                     control={form.control}
                     name="password"
                     render={({ field }) => (
                         <FormItem>
-                            <FormLabel>Password</FormLabel>
+                            <FormLabel>System Password</FormLabel>
                             <FormControl>
                                 <div className="relative">
                                     <Input
-                                        placeholder="Enter your password"
+                                        placeholder="Enter system password"
                                         type={showPassword ? "text" : "password"}
                                         autoComplete="current-password"
-                                        disabled={signInMutation.isPending}
+                                        disabled={isLoading}
                                         {...field}
                                     />
                                     <Button
@@ -112,7 +95,7 @@ export function SignInForm({
                                         size="sm"
                                         className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                                         onClick={() => setShowPassword(!showPassword)}
-                                        disabled={signInMutation.isPending}
+                                        disabled={isLoading}
                                     >
                                         {showPassword ? (
                                             <EyeOff className="h-4 w-4" />
@@ -127,9 +110,9 @@ export function SignInForm({
                     )}
                 />
 
-                <Button type="submit" className="w-full" disabled={signInMutation.isPending}>
-                    {signInMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    {signInMutation.isPending ? "Signing in..." : "Sign In"}
+                <Button type="submit" className="w-full" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading ? "Verifying..." : "Access System"}
                 </Button>
             </form>
         </Form>

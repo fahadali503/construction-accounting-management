@@ -1,39 +1,32 @@
 import { BASE_API } from "./base";
-import { tokenUtils } from "../lib/token";
-import { SignInRequest, SignUpRequest, AuthResponse, User } from "../types/user.interface";
 
-// Add token to requests if available
-BASE_API.interceptors.request.use((config: any) => {
-    const token = tokenUtils.getToken();
-    if (token) {
-        config.headers = config.headers || {};
-        config.headers.Authorization = `Bearer ${token}`;
-    }
-    return config;
-});
+export interface PasswordVerifyRequest {
+    password: string;
+}
+
+export interface PasswordVerifyResponse {
+    message: string;
+}
 
 export const authApi = {
-    signIn: async (data: SignInRequest): Promise<AuthResponse> => {
-        const response = await BASE_API.post<AuthResponse>("/auth/signin", data);
+    // Simple password verification for the construction management app
+    verifyPassword: async (data: PasswordVerifyRequest): Promise<PasswordVerifyResponse> => {
+        const response = await BASE_API.post<PasswordVerifyResponse>("/api/auth/verify", data);
         return response.data;
     },
 
-    signUp: async (data: SignUpRequest): Promise<AuthResponse> => {
-        const response = await BASE_API.post<AuthResponse>("/auth/signup", data);
-        return response.data;
+    // Store authentication state locally
+    setAuthenticated: (isAuthenticated: boolean): void => {
+        localStorage.setItem("authenticated", isAuthenticated.toString());
     },
 
-    signOut: async (): Promise<void> => {
-        await BASE_API.post("/auth/signout");
+    // Check if user is authenticated
+    isAuthenticated: (): boolean => {
+        return localStorage.getItem("authenticated") === "true";
     },
 
-    refreshToken: async (): Promise<AuthResponse> => {
-        const response = await BASE_API.post<AuthResponse>("/auth/refresh");
-        return response.data;
-    },
-
-    getProfile: async (): Promise<{ user: User }> => {
-        const response = await BASE_API.get("/auth/profile");
-        return response.data;
+    // Sign out - clear local authentication
+    signOut: (): void => {
+        localStorage.removeItem("authenticated");
     },
 };
