@@ -24,7 +24,7 @@ export const useSignIn = (): UseSignInReturn => {
                 window.location.href = '/';
             }
         } catch (err: any) {
-            setError(err.response?.data?.message || 'Authentication failed');
+            setError(err.message || 'Authentication failed');
         } finally {
             setIsLoading(false);
         }

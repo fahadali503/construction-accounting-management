@@ -9,10 +9,16 @@ export interface PasswordVerifyResponse {
 }
 
 export const authApi = {
-    // Simple password verification for the construction management app
+    // Client-side password verification for the construction management app
     verifyPassword: async (data: PasswordVerifyRequest): Promise<PasswordVerifyResponse> => {
-        const response = await BASE_API.post<PasswordVerifyResponse>("/api/auth/verify", data);
-        return response.data;
+        // Client-side verification without API call
+        const correctPassword = process.env.NEXT_PUBLIC_APP_PASSWORD || 'admin123'
+
+        if (data.password === correctPassword) {
+            return { message: 'Authentication successful' }
+        } else {
+            throw new Error('Invalid password')
+        }
     },
 
     // Store authentication state locally

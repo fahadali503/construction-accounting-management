@@ -33,22 +33,15 @@ export function PasswordProtection({ children }: PasswordProtectionProps) {
         setError('')
 
         try {
-            // Make API call to verify password
-            const response = await fetch('/api/auth/verify', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ password }),
-            })
+            // Client-side password verification
+            const correctPassword = process.env.NEXT_PUBLIC_APP_PASSWORD || 'admin123'
 
-            if (response.ok) {
+            if (password === correctPassword) {
                 setIsAuthenticated(true)
                 sessionStorage.setItem('isAuthenticated', 'true')
                 setPassword('')
             } else {
-                const data = await response.json()
-                setError(data.message || 'Invalid password')
+                setError('Invalid password')
                 setPassword('')
             }
         } catch (error) {

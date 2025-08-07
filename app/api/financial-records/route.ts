@@ -16,7 +16,7 @@ export async function POST(request: NextRequest) {
             totalAmount
         } = body
 
-        const financialRecord = await (prisma as any).financialRecord.create({
+        const financialRecord = await prisma.financialRecord.create({
             data: {
                 projectId,
                 date: new Date(date),
