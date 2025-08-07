@@ -21,9 +21,7 @@ export default function RootLayout({
     <html lang="en">
       <body className={inter.className}>
         <Providers>
-          <PasswordProtection>
-            {children}
-          </PasswordProtection>
+          {children}
         </Providers>
       </body>
     </html>

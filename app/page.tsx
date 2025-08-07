@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { DashboardView } from '@/components/dashboard/DashboardView'
 import { ReportsView } from '@/components/reports/ReportsView'
 import { ProjectFinancialView } from '@/components/project/ProjectFinancialView'
+import { PasswordProtection } from '@/components/auth/PasswordProtection'
 
 export default function HomePage() {
   const [currentView, setCurrentView] = useState<'dashboard' | 'reports' | 'project'>('dashboard')
@@ -25,23 +26,25 @@ export default function HomePage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {currentView === 'dashboard' ? (
-        <DashboardView
-          onViewReport={handleViewReport}
-          onViewProject={handleViewProject}
-        />
-      ) : currentView === 'reports' ? (
-        <ReportsView
-          projectId={selectedProjectId!}
-          onBack={handleBackToDashboard}
-        />
-      ) : (
-        <ProjectFinancialView
-          projectId={selectedProjectId!}
-          onBack={handleBackToDashboard}
-        />
-      )}
-    </div>
+    <PasswordProtection>
+      <div className="min-h-screen bg-gray-50">
+        {currentView === 'dashboard' ? (
+          <DashboardView
+            onViewReport={handleViewReport}
+            onViewProject={handleViewProject}
+          />
+        ) : currentView === 'reports' ? (
+          <ReportsView
+            projectId={selectedProjectId!}
+            onBack={handleBackToDashboard}
+          />
+        ) : (
+          <ProjectFinancialView
+            projectId={selectedProjectId!}
+            onBack={handleBackToDashboard}
+          />
+        )}
+      </div>
+    </PasswordProtection>
   )
 }
